@@ -1,10 +1,16 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useState
+} from "react"
 
 const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
 
@@ -13,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         const name = localStorage.getItem("name")
         const email = localStorage.getItem("email")
 
-        if(token){
+        if (token) {
             setUser({
                 token,
                 role,
@@ -21,6 +27,8 @@ export const AuthProvider = ({ children }) => {
                 email
             })
         }
+
+        setLoading(false)
 
     }, [])
 
@@ -48,6 +56,7 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider
             value={{
                 user,
+                loading,
                 login,
                 logout
             }}

@@ -31,7 +31,7 @@ const Register = () => {
 
       alert("Registration Successful")
 
-      navigate("/")
+      navigate("/login")
 
     } catch (error) {
 
