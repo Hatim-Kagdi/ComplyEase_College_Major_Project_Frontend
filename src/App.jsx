@@ -13,6 +13,7 @@ import Compliance from "./pages/compliance/Compliance"
 import Document from "./pages/document/Document"
 
 import ProtectedRoute from "./routes/ProtectedRoutes"
+import AssignCA from "./pages/admin/assignCA"
 
 function App() {
 
@@ -68,6 +69,11 @@ function App() {
           <Route
             path="/admin/dashboard"
             element={<AdminDashboard />}
+          />
+
+          <Route
+            path="/admin/assign-ca"
+            element={<AssignCA />}
           />
 
         </Route>

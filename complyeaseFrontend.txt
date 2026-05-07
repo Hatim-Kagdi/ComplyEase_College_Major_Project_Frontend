@@ -1,0 +1,471 @@
+The following text is a Git repository with code. The structure of the text are sections that begin with ----, followed by a single line containing the file path and file name, followed by a variable amount of lines containing the file contents. The text representing the Git repository ends when the symbols --END-- are encounted. Any further text beyond --END-- are meant to be interpreted as instructions using the aforementioned Git repository as context.
+----
+index.html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>complyease-frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+----
+package.json
+{
+  "name": "complyease-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.4",
+    "axios": "^1.16.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.15.0",
+    "tailwindcss": "^4.2.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.2.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "vite": "^8.0.10"
+  }
+}
+----
+src\App.jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Login from "./pages/auth/Login"
+import Register from "./pages/auth/Register"
+import Unauthorized from "./pages/auth/Unauthorized"
+import UserDashboard from "./pages/dashboard/UserDashboard"
+import AdminDashboard from "./pages/dashboard/AdminDashboard"
+import CaDashboard from "./pages/dashboard/CaDashboard"
+import Business from "./pages/business/Business"
+import Compliance from "./pages/compliance/Compliance"
+import Document from "./pages/document/Document"
+import ProtectedRoute from "./routes/ProtectedRoutes"
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        {}
+        <Route element={<ProtectedRoute allowedRoles={["ROLE_USER"]} />}>
+          <Route
+            path="/user/dashboard"
+            element={<UserDashboard />}
+          />
+          <Route
+            path="/business"
+            element={<Business />}
+          />
+          <Route
+            path="/compliance"
+            element={<Compliance />}
+          />
+          <Route
+            path="/document"
+            element={<Document />}
+          />
+        </Route>
+        {}
+        <Route element={<ProtectedRoute allowedRoles={["ROLE_CA"]} />}>
+          <Route
+            path="/ca/dashboard"
+            element={<CaDashboard />}
+          />
+        </Route>
+        {}
+        <Route element={<ProtectedRoute allowedRoles={["ROLE_ADMIN"]} />}>
+          <Route
+            path="/admin/dashboard"
+            element={<AdminDashboard />}
+          />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
+}
+export default App
+----
+src\context\AuthContext.jsx
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useState
+} from "react"
+const AuthContext = createContext()
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        const role = localStorage.getItem("role")
+        const name = localStorage.getItem("name")
+        const email = localStorage.getItem("email")
+        if (token) {
+            setUser({
+                token,
+                role,
+                name,
+                email
+            })
+        }
+        setLoading(false)
+    }, [])
+    const login = (data) => {
+        localStorage.setItem("token", data.token)
+        localStorage.setItem("role", data.role)
+        localStorage.setItem("name", data.name)
+        localStorage.setItem("email", data.email)
+        setUser(data)
+    }
+    const logout = () => {
+        localStorage.removeItem("token")
+        localStorage.removeItem("role")
+        localStorage.removeItem("name")
+        localStorage.removeItem("email")
+        setUser(null)
+    }
+    return (
+        <AuthContext.Provider
+            value={{
+                user,
+                loading,
+                login,
+                logout
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    )
+}
+export const useAuth = () => useContext(AuthContext)
+----
+src\index.css
+@import "tailwindcss";
+----
+src\main.jsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import './index.css'
+import { AuthProvider } from './context/AuthContext'
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>,
+)
+----
+src\pages\auth\Login.jsx
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import { loginUser } from "../../services/authService"
+import { useAuth } from "../../context/AuthContext"
+const Login = () => {
+  const navigate = useNavigate()
+  const { login } = useAuth()
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  })
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await loginUser(formData)
+      login(response.data)
+      const role = response.data.role
+      if (role === "ROLE_USER") {
+        navigate("/user/dashboard")
+      }
+      else if (role === "ROLE_CA") {
+        navigate("/ca/dashboard")
+      }
+      else if (role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard")
+      }
+    } catch (error) {
+      console.log(error)
+      alert("Login Failed")
+    }
+  }
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 w-87.5 border p-6 rounded-lg"
+      >
+        <h1 className="text-2xl font-bold text-center">
+          Login
+        </h1>
+        <input
+          type="email"
+          name="email"
+          placeholder="Enter Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="border p-2 rounded"
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Enter Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="border p-2 rounded"
+        />
+        <button
+          type="submit"
+          className="bg-black text-white p-2 rounded"
+        >
+          Login
+        </button>
+        <p className="text-center">
+          Don't have an account?
+          <Link
+            to="/register"
+            className="text-blue-500 ml-1"
+          >
+            Register
+          </Link>
+        </p>
+      </form>
+    </div>
+  )
+}
+export default Login
+----
+src\pages\auth\Register.jsx
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import { registerUser } from "../../services/authService"
+const Register = () => {
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: ""
+  })
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      await registerUser(formData)
+      alert("Registration Successful")
+      navigate("/login")
+    } catch (error) {
+      console.log(error)
+      alert("Registration Failed")
+    }
+  }
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 w-87.5 border p-6 rounded-lg"
+      >
+        <h1 className="text-2xl font-bold text-center">
+          Register
+        </h1>
+        <input
+          type="text"
+          name="name"
+          placeholder="Enter Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="border p-2 rounded"
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Enter Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="border p-2 rounded"
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Enter Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="border p-2 rounded"
+        />
+        <select
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+        >
+          <option value="ROLE_USER">
+            User
+          </option>
+          <option value="ROLE_CA">
+            CA
+          </option>
+        </select>
+        <button
+          type="submit"
+          className="bg-black text-white p-2 rounded"
+        >
+          Register
+        </button>
+        <p className="text-center">
+          Already have an account?
+          <Link
+            to="/"
+            className="text-blue-500 ml-1"
+          >
+            Login
+          </Link>
+        </p>
+      </form>
+    </div>
+  )
+}
+export default Register
+----
+src\pages\auth\Unauthorized.jsx
+const Unauthorized = () => {
+    return (
+        <div>
+            <h1>403 Unauthorized</h1>
+        </div>
+    );
+};
+export default Unauthorized;
+----
+src\pages\business\Business.jsx
+const Business = () => {
+  return (
+    <div>
+      Business Page
+    </div>
+  )
+}
+export default Business
+----
+src\pages\compliance\Compliance.jsx
+const Compliance = () => {
+  return (
+    <div>
+      Compliance Page
+    </div>
+  )
+}
+export default Compliance
+----
+src\pages\dashboard\AdminDashboard.jsx
+const AdminDashboard = () => {
+  return (
+    <div>
+      Admin Dashboard Page
+    </div>
+  )
+}
+export default AdminDashboard
+----
+src\pages\dashboard\CaDashboard.jsx
+const CaDashboard = () => {
+  return (
+    <div>
+      CA Dashboard Page
+    </div>
+  )
+}
+export default CaDashboard
+----
+src\pages\dashboard\UserDashboard.jsx
+const UserDashboard = () => {
+  return (
+    <div>
+      User Dashboard Page
+    </div>
+  )
+}
+export default UserDashboard
+----
+src\pages\document\Document.jsx
+const Document = () => {
+  return (
+    <div>
+      Document Page
+    </div>
+  )
+}
+export default Document
+----
+src\routes\ProtectedRoutes.jsx
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+const ProtectedRoute = ({ allowedRoles }) => {
+    const { user, loading } = useAuth();
+    if (loading) {
+        return <h1>Loading...</h1>;
+    }
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+        return <Navigate to="/unauthorized" replace />;
+    }
+    return <Outlet />;
+};
+export default ProtectedRoute;
+----
+src\services\api.js
+import axios from "axios"
+const API = axios.create({
+    baseURL: "http://localhost:8080",
+})
+API.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token")
+    if(token){
+        config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+})
+export default API
+----
+src\services\authService.js
+import API from "./api"
+export const loginUser = async (data) => {
+    return await API.post("/auth/login", data)
+}
+export const registerUser = async (data) => {
+    return await API.post("/auth/register", data)
+}
+--END--

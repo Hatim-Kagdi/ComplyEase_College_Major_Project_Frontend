@@ -1,0 +1,161 @@
+1. ROLE_USER (Business Owner / Client)
+
+This is the main customer.
+
+User Responsibilities
+Authentication(Done)
+Register(Done)
+Login(Done)
+Logout(Done)
+Business Management(Done)
+	Create businesses
+	Update businesses
+	Delete businesses
+	View all their businesses
+Compliance Management
+	Create compliance records
+	View compliances
+	Update status
+	Delete compliances
+Document Management
+	Upload document details
+	View documents
+	Delete documents
+Notifications
+	Receive reminders
+	View due dates
+Dashboard
+
+Should show:
+
+	Total businesses
+	Pending compliances
+	Completed compliances
+	Upcoming due dates
+2. ROLE_CA (Chartered Accountant)
+
+This role should NOT behave like a normal user.
+
+A CA manages multiple clients.
+
+This is where your project becomes interesting.
+
+CA Responsibilities
+Client Oversight
+
+CA should:
+
+View assigned businesses
+View client compliances
+View uploaded documents
+Compliance Assistance
+
+CA can:
+
+Update compliance status
+Mark completed
+Add remarks/comments later
+Dashboard
+
+Should show:
+
+Total assigned clients
+Pending compliances
+Overdue compliances
+Upcoming deadlines
+VERY IMPORTANT QUESTION
+How does a CA get connected to businesses?
+
+You need ONE of these systems:
+
+Option A — Simple Version (Recommended)
+
+Business has:
+
+@ManyToOne
+private User assignedCA;
+
+Meaning:
+
+each business can have one CA
+admin manually assigns CA
+simplest architecture
+best for your current level
+Option B — Advanced Marketplace
+
+Users request CAs, CAs accept clients, etc.
+
+Too complex for now.
+
+Recommendation
+
+Use:
+
+Option A
+
+Because it gives:
+
+real role separation
+real business workflow
+scalable architecture
+manageable complexity
+3. ROLE_ADMIN
+
+Admin controls platform management.
+
+Admin is NOT normal user.
+
+Admin Responsibilities
+User Management
+View all users
+Delete users
+Activate/deactivate users
+CA Management
+View all CAs
+Approve CAs
+Assign CAs to businesses
+Business Oversight
+View all businesses
+View platform statistics
+Dashboard
+
+Should show:
+
+Total users
+Total businesses
+Total compliances
+Total CAs
+MOST IMPORTANT ARCHITECTURE DECISION
+
+You need to decide:
+
+Who creates compliances?
+
+Two possibilities:
+
+OPTION 1 — User Creates Compliance
+
+User manually creates:
+
+GST
+TDS
+PF
+etc.
+
+Simple CRUD system.
+
+Good for current stage.
+
+OPTION 2 — System Generates Compliance Automatically
+
+Based on business type.
+
+Much more advanced.
+
+Not needed now.
+
+Recommendation
+
+Use:
+
+OPTION 1

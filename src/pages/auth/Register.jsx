@@ -10,7 +10,8 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
+    role: "ROLE_USER"
   })
 
   const handleChange = (e) => {
