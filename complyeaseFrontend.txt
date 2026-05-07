@@ -1,5 +1,121 @@
 The following text is a Git repository with code. The structure of the text are sections that begin with ----, followed by a single line containing the file path and file name, followed by a variable amount of lines containing the file contents. The text representing the Git repository ends when the symbols --END-- are encounted. Any further text beyond --END-- are meant to be interpreted as instructions using the aforementioned Git repository as context.
 ----
+complyeaseRoleResponsibilties.txt
+1. ROLE_USER (Business Owner / Client)
+This is the main customer.
+User Responsibilities
+Authentication(Done)
+Register(Done)
+Login(Done)
+Logout(Done)
+Business Management(Done)
+	Create businesses
+	Update businesses
+	Delete businesses
+	View all their businesses
+Compliance Management
+	Create compliance records
+	View compliances
+	Update status
+	Delete compliances
+Document Management
+	Upload document details
+	View documents
+	Delete documents
+Notifications
+	Receive reminders
+	View due dates
+Dashboard
+Should show:
+	Total businesses
+	Pending compliances
+	Completed compliances
+	Upcoming due dates
+2. ROLE_CA (Chartered Accountant)
+This role should NOT behave like a normal user.
+A CA manages multiple clients.
+This is where your project becomes interesting.
+CA Responsibilities
+Client Oversight
+CA should:
+View assigned businesses
+View client compliances
+View uploaded documents
+Compliance Assistance
+CA can:
+Update compliance status
+Mark completed
+Add remarks/comments later
+Dashboard
+Should show:
+Total assigned clients
+Pending compliances
+Overdue compliances
+Upcoming deadlines
+VERY IMPORTANT QUESTION
+How does a CA get connected to businesses?
+You need ONE of these systems:
+Option A — Simple Version (Recommended)
+Business has:
+@ManyToOne
+private User assignedCA;
+Meaning:
+each business can have one CA
+admin manually assigns CA
+simplest architecture
+best for your current level
+Option B — Advanced Marketplace
+Users request CAs, CAs accept clients, etc.
+Too complex for now.
+Recommendation
+Use:
+Option A
+Because it gives:
+real role separation
+real business workflow
+scalable architecture
+manageable complexity
+3. ROLE_ADMIN
+Admin controls platform management.
+Admin is NOT normal user.
+Admin Responsibilities
+User Management
+View all users
+Delete users
+Activate/deactivate users
+CA Management
+View all CAs
+Approve CAs
+Assign CAs to businesses
+Business Oversight
+View all businesses
+View platform statistics
+Dashboard
+Should show:
+Total users
+Total businesses
+Total compliances
+Total CAs
+MOST IMPORTANT ARCHITECTURE DECISION
+You need to decide:
+Who creates compliances?
+Two possibilities:
+OPTION 1 — User Creates Compliance
+User manually creates:
+GST
+TDS
+PF
+etc.
+Simple CRUD system.
+Good for current stage.
+OPTION 2 — System Generates Compliance Automatically
+Based on business type.
+Much more advanced.
+Not needed now.
+Recommendation
+Use:
+OPTION 1
+----
 index.html
 <!doctype html>
 <html lang="en">
@@ -60,6 +176,7 @@ import Business from "./pages/business/Business"
 import Compliance from "./pages/compliance/Compliance"
 import Document from "./pages/document/Document"
 import ProtectedRoute from "./routes/ProtectedRoutes"
+import AssignCA from "./pages/admin/assignCA"
 function App() {
   return (
     <BrowserRouter>
@@ -101,12 +218,120 @@ function App() {
             path="/admin/dashboard"
             element={<AdminDashboard />}
           />
+          <Route
+            path="/admin/assign-ca"
+            element={<AssignCA />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>
   )
 }
 export default App
+----
+src\components\layouts\MainLayout.jsx
+import Sidebar from "./Sidebar"
+import Navbar from "./Navbar"
+const MainLayout = ({ children }) => {
+    return (
+        <div className="flex">
+            <Sidebar />
+            <div className="flex-1 bg-gray-100 min-h-screen">
+                <Navbar />
+                <div className="p-6">
+                    {children}
+                </div>
+            </div>
+        </div>
+    )
+}
+export default MainLayout
+----
+src\components\layouts\Navbar.jsx
+import { useAuth } from "../../context/AuthContext"
+const Navbar = () => {
+    const { user } = useAuth()
+    return (
+        <div className="h-16 border-b flex items-center justify-between px-6 bg-white">
+            <h1 className="text-xl font-semibold">
+                Dashboard
+            </h1>
+            <div>
+                <p className="font-medium">
+                    {user?.name}
+                </p>
+                <p className="text-sm text-gray-500">
+                    {user?.role}
+                </p>
+            </div>
+        </div>
+    )
+}
+export default Navbar
+----
+src\components\layouts\SideBar.jsx
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../../context/AuthContext"
+const Sidebar = () => {
+    const { logout, user } = useAuth()
+    const navigate = useNavigate()
+    const handleLogout = () => {
+        logout()
+        navigate("/login")
+    }
+    return (
+        <div className="w-64 min-h-screen bg-black text-white p-6">
+            <h1 className="text-2xl font-bold mb-10">
+                ComplyEase
+            </h1>
+            <div className="flex flex-col gap-4">
+                {
+                    user?.role === "ROLE_USER" &&
+                    <>
+                        <Link to="/user/dashboard">
+                            Dashboard
+                        </Link>
+                        <Link to="/business">
+                            Businesses
+                        </Link>
+                        <Link to="/compliance">
+                            Compliance
+                        </Link>
+                        <Link to="/document">
+                            Documents
+                        </Link>
+                    </>
+                }
+                {
+                    user?.role === "ROLE_CA" &&
+                    <>
+                        <Link to="/ca/dashboard">
+                            CA Dashboard
+                        </Link>
+                    </>
+                }
+                {
+                    user?.role === "ROLE_ADMIN" &&
+                    <>
+                        <Link to="/admin/dashboard">
+                            Dashboard
+                        </Link>
+                        <Link to="/admin/assign-ca">
+                            Assign CA
+                        </Link>
+                    </>
+                }
+                <button
+                    onClick={handleLogout}
+                    className="bg-red-500 mt-10 p-2 rounded"
+                >
+                    Logout
+                </button>
+            </div>
+        </div>
+    )
+}
+export default Sidebar
 ----
 src\context\AuthContext.jsx
 import {
@@ -179,6 +404,125 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </AuthProvider>
   </React.StrictMode>,
 )
+----
+src\pages\admin\AssignCA.jsx
+import { useEffect, useState } from "react"
+import MainLayout from "../../components/layouts/MainLayout"
+import {
+    getRequestedBusinesses,
+    getAllCAUsers,
+    assignCA
+} from "../../services/adminService"
+const AssignCA = () => {
+    const [businesses, setBusinesses] = useState([])
+    const [caUsers, setCaUsers] = useState([])
+    const [selectedCA, setSelectedCA] = useState({})
+    const fetchData = async () => {
+        try {
+            const businessResponse =
+                await getRequestedBusinesses()
+            const caResponse =
+                await getAllCAUsers()
+            setBusinesses(businessResponse.data)
+            setCaUsers(caResponse.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        fetchData()
+    }, [])
+    const handleSelectCA = (businessId, caId) => {
+        setSelectedCA({
+            ...selectedCA,
+            [businessId]: caId
+        })
+    }
+    const handleAssignCA = async (businessId) => {
+        try {
+            const caId = selectedCA[businessId]
+            if (!caId) {
+                alert("Please select a CA")
+                return
+            }
+            await assignCA(businessId, caId)
+            alert("CA Assigned Successfully")
+            fetchData()
+        } catch (error) {
+            console.log(error)
+            alert("Assignment Failed")
+        }
+    }
+    return (
+        <MainLayout>
+            <div>
+                <h1 className="text-3xl font-bold mb-6">
+                    Assign CA
+                </h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {
+                        businesses.map((business) => (
+                            <div
+                                key={business.businessId}
+                                className="bg-white p-6 rounded-lg shadow"
+                            >
+                                <h2 className="text-xl font-semibold">
+                                    {business.businessName}
+                                </h2>
+                                <p className="mt-2 text-gray-600">
+                                    GST:
+                                    {" "}
+                                    {business.businessGstNumber}
+                                </p>
+                                <div className="mt-4 flex flex-col gap-3">
+                                    <select
+                                        value={
+                                            selectedCA[
+                                                business.businessId
+                                            ] || ""
+                                        }
+                                        onChange={(e) =>
+                                            handleSelectCA(
+                                                business.businessId,
+                                                e.target.value
+                                            )
+                                        }
+                                        className="border p-2 rounded"
+                                    >
+                                        <option value="">
+                                            Select CA
+                                        </option>
+                                        {
+                                            caUsers.map((ca) => (
+                                                <option
+                                                    key={ca.id}
+                                                    value={ca.id}
+                                                >
+                                                    {ca.name}
+                                                </option>
+                                            ))
+                                        }
+                                    </select>
+                                    <button
+                                        onClick={() =>
+                                            handleAssignCA(
+                                                business.businessId
+                                            )
+                                        }
+                                        className="bg-black text-white py-2 rounded"
+                                    >
+                                        Assign CA
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </MainLayout>
+    )
+}
+export default AssignCA
 ----
 src\pages\auth\Login.jsx
 import { useState } from "react"
@@ -273,7 +617,8 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
+    role: "ROLE_USER"
   })
   const handleChange = (e) => {
     setFormData({
@@ -369,61 +714,322 @@ const Unauthorized = () => {
 export default Unauthorized;
 ----
 src\pages\business\Business.jsx
+import { useEffect, useState } from "react"
+import {
+    createBusiness,
+    getBusinesses,
+    deleteBusiness,
+    updateBusiness
+} from "../../services/businessService"
+import MainLayout from "../../components/layouts/MainLayout"
 const Business = () => {
-  return (
-    <div>
-      Business Page
-    </div>
-  )
+    const [businesses, setBusinesses] = useState([])
+    const [formData, setFormData] = useState({
+        businessName: "",
+        businessGstNumber: ""
+    })
+    const [editingId, setEditingId] = useState(null)
+    const fetchBusinesses = async () => {
+        try {
+            const response = await getBusinesses()
+            setBusinesses(response.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        fetchBusinesses()
+    }, [])
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        })
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        try {
+            if (editingId) {
+                await updateBusiness(editingId, formData)
+                alert("Business Updated")
+                setEditingId(null)
+            }
+            else {
+                await createBusiness(formData)
+                alert("Business Created")
+            }
+            setFormData({
+                businessName: "",
+                businessGstNumber: ""
+            })
+            fetchBusinesses()
+        } catch (error) {
+            console.log(error)
+            alert("Operation Failed")
+        }
+    }
+    const handleDelete = async (id) => {
+        try {
+            await deleteBusiness(id)
+            alert("Business Deleted")
+            fetchBusinesses()
+        } catch (error) {
+            console.log(error)
+            alert("Delete Failed")
+        }
+    }
+    const handleEdit = (business) => {
+        setEditingId(business.businessId)
+        setFormData({
+            businessName: business.businessName,
+            businessGstNumber: business.businessGstNumber
+        })
+    }
+    return (
+      <MainLayout>
+        <div className="min-h-screen p-8">
+            <h1 className="text-3xl font-bold mb-6">
+                Business Management
+            </h1>
+            {}
+            <form
+                onSubmit={handleSubmit}
+                className="border p-6 rounded-lg flex flex-col gap-4 max-w-md"
+            >
+                <input
+                    type="text"
+                    name="businessName"
+                    placeholder="Enter Business Name"
+                    value={formData.businessName}
+                    onChange={handleChange}
+                    className="border p-2 rounded"
+                />
+                <input
+                    type="text"
+                    name="businessGstNumber"
+                    placeholder="Enter GST Number"
+                    value={formData.businessGstNumber}
+                    onChange={handleChange}
+                    className="border p-2 rounded"
+                />
+                <button
+                    type="submit"
+                    className="bg-black text-white p-2 rounded"
+                >
+                    {
+                        editingId
+                            ? "Update Business"
+                            : "Create Business"
+                    }
+                </button>
+            </form>
+            {}
+            <div className="mt-10">
+                <h2 className="text-2xl font-semibold mb-4">
+                    Your Businesses
+                </h2>
+                <div className="flex flex-col gap-4">
+                    {
+                        businesses.map((business) => (
+                            <div
+                                key={business.businessId}
+                                className="border p-4 rounded-lg flex justify-between items-center"
+                            >
+                                <div>
+                                    <h3 className="font-bold text-lg">
+                                        {business.businessName}
+                                    </h3>
+                                    <p>
+                                        GST:
+                                        {" "}
+                                        {business.businessGstNumber}
+                                    </p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleEdit(business)}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(business.businessId)}
+                                        className="bg-red-500 text-white px-4 py-2 rounded"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </div>
+        </MainLayout>
+    )
 }
 export default Business
 ----
 src\pages\compliance\Compliance.jsx
+import MainLayout from "../../components/layouts/MainLayout"
 const Compliance = () => {
   return (
+    <MainLayout>
     <div>
       Compliance Page
     </div>
+    </MainLayout>
   )
 }
 export default Compliance
 ----
 src\pages\dashboard\AdminDashboard.jsx
+import MainLayout from "../../components/layouts/MainLayout"
 const AdminDashboard = () => {
-  return (
-    <div>
-      Admin Dashboard Page
-    </div>
-  )
+    return (
+        <MainLayout>
+            <div>
+                <h1 className="text-3xl font-bold">
+                    Admin Dashboard
+                </h1>
+                <p className="mt-4 text-gray-600">
+                    Welcome to the admin panel.
+                </p>
+            </div>
+        </MainLayout>
+    )
 }
 export default AdminDashboard
 ----
 src\pages\dashboard\CaDashboard.jsx
+import { useEffect, useState } from "react"
+import {
+    getAssignedBusinesses
+} from "../../services/businessService"
 const CaDashboard = () => {
-  return (
-    <div>
-      CA Dashboard Page
-    </div>
-  )
+    const [businesses, setBusinesses] = useState([])
+    const fetchBusinesses = async () => {
+        try {
+            const response =
+                await getAssignedBusinesses()
+            setBusinesses(response.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        fetchBusinesses()
+    }, [])
+    return (
+        <div className="p-6">
+            <h1 className="text-3xl font-bold mb-6">
+                CA Dashboard
+            </h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {businesses.map((business) => (
+                    <div
+                        key={business.businessId}
+                        className="border rounded-lg p-4 shadow"
+                    >
+                        <h2 className="text-xl font-semibold">
+                            {business.businessName}
+                        </h2>
+                        <p className="mt-2">
+                            GST: {business.businessGstNumber}
+                        </p>
+                        <p className="mt-2">
+                            Status: {business.caAssignmentStatus}
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
 }
 export default CaDashboard
 ----
 src\pages\dashboard\UserDashboard.jsx
+import { useEffect, useState } from "react"
+import {
+    getBusinesses,
+    requestCA
+} from "../../services/businessService"
+import MainLayout from "../../components/layouts/MainLayout"
 const UserDashboard = () => {
-  return (
-    <div>
-      User Dashboard Page
-    </div>
-  )
+    const [businesses, setBusinesses] = useState([])
+    const fetchBusinesses = async () => {
+        try {
+            const response = await getBusinesses()
+            setBusinesses(response.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        fetchBusinesses()
+    }, [])
+    const handleRequestCA = async (businessId) => {
+        try {
+            await requestCA(businessId)
+            fetchBusinesses()
+        } catch (error) {
+            console.log(error)
+            alert("Failed to request CA")
+        }
+    }
+    return (
+      <MainLayout>
+        <div className="p-6">
+            <h1 className="text-3xl font-bold mb-6">
+                User Dashboard
+            </h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {businesses.map((business) => (
+                    <div
+                        key={business.businessId}
+                        className="border rounded-lg p-4 shadow"
+                    >
+                        <h2 className="text-xl font-semibold">
+                            {business.businessName}
+                        </h2>
+                        <p className="mt-2">
+                            GST: {business.businessGstNumber}
+                        </p>
+                        <p className="mt-2 font-medium">
+                            Status: {business.caAssignmentStatus}
+                        </p>
+                        {
+                            business.caAssignmentStatus === "NO_CA" && (
+                                <button
+                                    onClick={() =>
+                                        handleRequestCA(
+                                            business.businessId
+                                        )
+                                    }
+                                    className="mt-4 bg-black text-white px-4 py-2 rounded"
+                                >
+                                    Request CA
+                                </button>
+                            )
+                        }
+                    </div>
+                ))}
+            </div>
+        </div>
+        </MainLayout>
+    )
 }
 export default UserDashboard
 ----
 src\pages\document\Document.jsx
+import MainLayout from "../../components/layouts/MainLayout"
 const Document = () => {
   return (
+    <MainLayout>
     <div>
       Document Page
     </div>
+    </MainLayout>
   )
 }
 export default Document
@@ -446,6 +1052,20 @@ const ProtectedRoute = ({ allowedRoles }) => {
 };
 export default ProtectedRoute;
 ----
+src\services\adminService.js
+import API from "./api"
+export const getRequestedBusinesses = async () => {
+    return await API.get("/admin/business/requested")
+}
+export const getAllCAUsers = async () => {
+    return await API.get("/admin/ca")
+}
+export const assignCA = async (businessId, caId) => {
+    return await API.patch(
+        `/admin/business/${businessId}/assign-ca/${caId}`
+    )
+}
+----
 src\services\api.js
 import axios from "axios"
 const API = axios.create({
@@ -467,5 +1087,29 @@ export const loginUser = async (data) => {
 }
 export const registerUser = async (data) => {
     return await API.post("/auth/register", data)
+}
+----
+src\services\businessService.js
+import API from "./api"
+export const createBusiness = async (data) => {
+    return await API.post("/user/business", data)
+}
+export const getBusinesses = async () => {
+    return await API.get("/user/business")
+}
+export const getBusinessById = async (id) => {
+    return await API.get(`/user/business/${id}`)
+}
+export const updateBusiness = async (id, data) => {
+    return await API.put(`/user/business/${id}`, data)
+}
+export const deleteBusiness = async (id) => {
+    return await API.delete(`/user/business/${id}`)
+}
+export const requestCA = async (id) => {
+    return await API.patch(`/user/business/${id}/request-ca`)
+}
+export const getAssignedBusinesses = async () => {
+    return await API.get("/ca/business")
 }
 --END--

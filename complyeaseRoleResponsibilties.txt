@@ -12,12 +12,12 @@ Business Management(Done)
 	Update businesses
 	Delete businesses
 	View all their businesses
-Compliance Management
+Compliance Management(Done)
 	Create compliance records
 	View compliances
 	Update status
 	Delete compliances
-Document Management
+Document Management(Done)
 	Upload document details
 	View documents
 	Delete documents
@@ -26,7 +26,7 @@ Notifications
 	View due dates
 Dashboard
 
-Should show:
+Should show:(Done)
 
 	Total businesses
 	Pending compliances
@@ -45,60 +45,22 @@ Client Oversight
 
 CA should:
 
-View assigned businesses
-View client compliances
-View uploaded documents
-Compliance Assistance
-
+View assigned businesses(Done)
+View client compliances(Done)
+View uploaded documents(Done)
+Compliance Assistance(Done)
 CA can:
-
 Update compliance status
 Mark completed
 Add remarks/comments later
-Dashboard
 
+Dashboard(Done)
 Should show:
-
 Total assigned clients
 Pending compliances
 Overdue compliances
 Upcoming deadlines
-VERY IMPORTANT QUESTION
-How does a CA get connected to businesses?
 
-You need ONE of these systems:
-
-Option A — Simple Version (Recommended)
-
-Business has:
-
-@ManyToOne
-private User assignedCA;
-
-Meaning:
-
-each business can have one CA
-admin manually assigns CA
-simplest architecture
-best for your current level
-Option B — Advanced Marketplace
-
-Users request CAs, CAs accept clients, etc.
-
-Too complex for now.
-
-Recommendation
-
-Use:
-
-Option A
-
-Because it gives:
-
-real role separation
-real business workflow
-scalable architecture
-manageable complexity
 3. ROLE_ADMIN
 
 Admin controls platform management.
@@ -125,37 +87,17 @@ Total users
 Total businesses
 Total compliances
 Total CAs
-MOST IMPORTANT ARCHITECTURE DECISION
 
-You need to decide:
-
-Who creates compliances?
-
-Two possibilities:
-
-OPTION 1 — User Creates Compliance
-
-User manually creates:
-
-GST
-TDS
-PF
-etc.
-
-Simple CRUD system.
-
-Good for current stage.
-
-OPTION 2 — System Generates Compliance Automatically
-
-Based on business type.
-
-Much more advanced.
-
-Not needed now.
-
-Recommendation
-
-Use:
-
-OPTION 1
+NEXT
+1. CA Assignment System
+backend entity relation
+admin assignment api
+ca business viewing api(Done)
+2. Proper Dashboards
+stats cards
+counts
+recent activities
+3. Compliance Frontend(Done)
+4. Document Frontend(done)
+5. Notification System
+6. Admin Management

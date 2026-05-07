@@ -34,7 +34,16 @@ const Sidebar = () => {
                     user?.role === "ROLE_CA" &&
                     <>
                         <Link to="/ca/dashboard">
-                            CA Dashboard
+                            Dashboard
+                        </Link>
+                        <Link to="/ca/businesses">
+                            Assigned Businesses
+                        </Link>
+                        <Link to="/ca/compliances">
+                            Client Compliances
+                        </Link>
+                        <Link to="/ca/documents">
+                            Client Documents
                         </Link>
                     </>
                 }

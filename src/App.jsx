@@ -14,6 +14,9 @@ import Document from "./pages/document/Document"
 
 import ProtectedRoute from "./routes/ProtectedRoutes"
 import AssignCA from "./pages/admin/assignCA"
+import AssignedBusinesses from "./pages/ca/AssignedBusinesses"
+import ClientCompliances from "./pages/ca/ClientCompliances"
+import CADocuments from "./pages/ca/ClientDocuments"
 
 function App() {
 
@@ -59,6 +62,21 @@ function App() {
           <Route
             path="/ca/dashboard"
             element={<CaDashboard />}
+          />
+
+          <Route
+            path="/ca/businesses"
+            element={<AssignedBusinesses />}
+          />
+
+          <Route
+            path="/ca/compliances"
+            element={<ClientCompliances />}
+          />
+
+          <Route
+            path="/ca/documents"
+            element={<CADocuments />}
           />
 
         </Route>
