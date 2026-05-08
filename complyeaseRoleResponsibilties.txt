@@ -68,18 +68,18 @@ Admin controls platform management.
 Admin is NOT normal user.
 
 Admin Responsibilities
-User Management
-View all users
-Delete users
-Activate/deactivate users
-CA Management
-View all CAs
-Approve CAs
-Assign CAs to businesses
+User Management(DOne)
+	View all users
+	Delete users
+	Activate/deactivate users
+CA Management(Done)
+	View all CAs
+	Approve CAs
+	Assign CAs to businesses
 Business Oversight
-View all businesses
-View platform statistics
-Dashboard
+	View all businesses
+	View platform statistics
+Dashboard(Done)
 
 Should show:
 

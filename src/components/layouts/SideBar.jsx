@@ -57,6 +57,15 @@ const Sidebar = () => {
                         <Link to="/admin/assign-ca">
                             Assign CA
                         </Link>
+                        <Link to="/admin/users">
+                            User Management
+                        </Link>
+                        <Link to="/admin/ca-management">
+                            CA Management
+                        </Link>
+                        <Link to="/admin/business-oversight">
+                            Business Oversight
+                        </Link>
                     </>
                 }
                 <button

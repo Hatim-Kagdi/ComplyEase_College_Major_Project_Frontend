@@ -17,6 +17,9 @@ import AssignCA from "./pages/admin/assignCA"
 import AssignedBusinesses from "./pages/ca/AssignedBusinesses"
 import ClientCompliances from "./pages/ca/ClientCompliances"
 import CADocuments from "./pages/ca/ClientDocuments"
+import UserManagement from "./pages/admin/UserManagement"
+import CAManagement from "./pages/admin/CaManagement"
+import BusinessOversight from "./pages/admin/BusinessOversight"
 
 function App() {
 
@@ -92,6 +95,21 @@ function App() {
           <Route
             path="/admin/assign-ca"
             element={<AssignCA />}
+          />
+
+          <Route
+            path="/admin/users"
+            element={<UserManagement />}
+          />
+
+          <Route
+            path="/admin/ca-management"
+            element={<CAManagement />}
+          />
+
+          <Route
+            path="/admin/business-oversight"
+            element={<BusinessOversight />}
           />
 
         </Route>
