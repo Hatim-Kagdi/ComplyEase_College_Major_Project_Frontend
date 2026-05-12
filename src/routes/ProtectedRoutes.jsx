@@ -17,6 +17,17 @@ const ProtectedRoute = ({ allowedRoles }) => {
         return <Navigate to="/unauthorized" replace />;
     }
 
+    // src/routes/ProtectedRoutes.jsx
+
+    // CA Approval check using Enum values
+    if (user.role === "ROLE_CA" && user.approvalStatus !== "APPROVED") {
+        // If they were rejected, maybe send them to a different page
+        if (user.approvalStatus === "REJECTED") {
+            return <Navigate to="/account-rejected" replace />;
+        }
+        // Otherwise, assume PENDING and send to the waiting page
+        return <Navigate to="/ca/pending-approval" replace />;
+    }
     return <Outlet />;
 };
 

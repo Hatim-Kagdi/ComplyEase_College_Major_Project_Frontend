@@ -8,9 +8,9 @@ import UserDashboard from "./pages/dashboard/UserDashboard"
 import AdminDashboard from "./pages/dashboard/AdminDashboard"
 import CaDashboard from "./pages/dashboard/CaDashboard"
 
-import Business from "./pages/business/Business"
-import Compliance from "./pages/compliance/Compliance"
-import Document from "./pages/document/Document"
+import Business from "./pages/user/Business"
+import Compliance from "./pages/user/Compliance"
+import Document from "./pages/user/Document"
 
 import ProtectedRoute from "./routes/ProtectedRoutes"
 import AssignCA from "./pages/admin/assignCA"
@@ -20,6 +20,9 @@ import CADocuments from "./pages/ca/ClientDocuments"
 import UserManagement from "./pages/admin/UserManagement"
 import CAManagement from "./pages/admin/CaManagement"
 import BusinessOversight from "./pages/admin/BusinessOversight"
+import UserNotifications from "./pages/user/UserNotification"
+import LandingPage from "./components/ui/Landing"
+import PendingApproval from "./pages/ca/PendingApproval"
 
 function App() {
 
@@ -29,10 +32,11 @@ function App() {
       <Routes>
 
         {/* Public Routes */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/ca/pending-approval" element={<PendingApproval/>}/>
 
         {/* USER ROUTES */}
         <Route element={<ProtectedRoute allowedRoles={["ROLE_USER"]} />}>
@@ -55,6 +59,11 @@ function App() {
           <Route
             path="/document"
             element={<Document />}
+          />
+
+          <Route
+            path="/user/notification"
+            element={<UserNotifications />}
           />
 
         </Route>

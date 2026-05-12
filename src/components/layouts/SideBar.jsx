@@ -28,6 +28,10 @@ const Sidebar = () => {
                         <Link to="/document">
                             Documents
                         </Link>
+                        <Link to="/user/notification">
+                        Notification
+                        </Link>
+
                     </>
                 }
                 {

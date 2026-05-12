@@ -18,18 +18,18 @@ export const AuthProvider = ({ children }) => {
         const role = localStorage.getItem("role")
         const name = localStorage.getItem("name")
         const email = localStorage.getItem("email")
+        const approvalStatus = localStorage.getItem("approvalStatus");
 
         if (token) {
             setUser({
                 token,
                 role,
                 name,
-                email
+                email,
+                approvalStatus: approvalStatus
             })
         }
-
         setLoading(false)
-
     }, [])
 
     const login = (data) => {
@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("role", data.role)
         localStorage.setItem("name", data.name)
         localStorage.setItem("email", data.email)
+        localStorage.setItem("approvalStatus",data.approvalStatus)
 
         setUser(data)
     }
@@ -48,6 +49,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("role")
         localStorage.removeItem("name")
         localStorage.removeItem("email")
+        localStorage.removeItem("approvalStatus");
 
         setUser(null)
     }

@@ -21,13 +21,12 @@ Document Management(Done)
 	Upload document details
 	View documents
 	Delete documents
-Notifications
+Notifications (Done)
 	Receive reminders
 	View due dates
+
 Dashboard
-
 Should show:(Done)
-
 	Total businesses
 	Pending compliances
 	Completed compliances
@@ -99,5 +98,70 @@ counts
 recent activities
 3. Compliance Frontend(Done)
 4. Document Frontend(done)
-5. Notification System
-6. Admin Management
+5. Notification System(Done)
+6. Admin Management (Done)
+
+===All the above features were completed by 11 may 2026=====
+Advance Notification Module
+CA + Admin Notification Flows You Should Add
+
+1. CA Registration Request (Done)
+When a new CA registers:
+Admin should receive:
+“New CA approval request”
+CA should receive:
+“Your account is pending approval”
+
+This is a real onboarding workflow.
+
+2. CA Approval(Done)
+When admin approves CA:
+CA should receive:
+approval success email
+Example:
+Your CA account has been approved.
+You can now log in to ComplyEase.
+
+3. CA Rejection (Optional but Professional)
+If later you add reject functionality
+CA receives:
+Your CA verification request was rejected.
+Very real-world feature.
+
+4. User Requests CA (Done)
+When business owner requests CA assignment:
+Admin receives:
+Business XYZ requested CA assignment.
+
+5. CA Assigned To Business (Done)
+This is a BIG workflow.
+When admin assigns CA:
+User receives:
+CA Rahul Sharma has been assigned to your business.
+CA receives:
+You have been assigned to business ABC Pvt Ltd.
+This makes the platform feel alive.
+
+6. Compliance Status Updated By CA (Done)
+When CA marks compliance completed:
+User receives:
+GST_RETURN compliance marked COMPLETED by your CA.
+This is extremely useful.
+
+7. Compliance Overdue (Done)
+Scheduler can detect overdue compliances.
+User receives:
+Your GST filing is overdue.
+Optional:
+CA also receives.
+
+8. Document Uploaded (Done)
+When user uploads document:
+Assigned CA receives:
+New document uploaded for ABC Business.
+Very realistic CA workflow.
+
+9. Account Deactivated (Done)
+If admin disables user:
+User receives:
+Your account has been temporarily deactivated.

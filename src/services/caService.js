@@ -24,3 +24,8 @@ export const getCADocuments = async () => {
 export const getCADashboardStats = async () => {
     return await API.get("/ca/dashboard/stats")
 }
+
+export const reapplyCA = async (email) => {
+    console.log(`Reapplication for ${email}`);
+    return await API.patch(`/ca/${encodeURIComponent(email)}/reapply`)
+};

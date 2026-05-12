@@ -9,9 +9,7 @@ export const getAllCAUsers = async () => {
 }
 
 export const assignCA = async (businessId, caId) => {
-    return await API.patch(
-        `/admin/business/${businessId}/assign-ca/${caId}`
-    )
+    return await API.patch(`/admin/business/${businessId}/assign-ca/${caId}`)
 }
 
 export const getAllUsers = async () => {
@@ -33,10 +31,14 @@ export const getPendingCAs = async () => {
 }
 
 export const approveCA = async (id) => {
-    return await API.patch(
-        `/admin/ca/${id}/approve`
-    )
+    return await API.patch(`/admin/ca/${id}/approve`)
 }
+
+export const rejectCA = async (id) => {
+    // Log this to your console to see the actual URL being called
+    console.log(`Calling Reject for ID: ${id}`);
+    return await API.patch(`/admin/ca/${id}/reject`); 
+};
 
 export const getAllBusinesses = async () => {
     return await API.get("/admin/business")
@@ -45,3 +47,4 @@ export const getAllBusinesses = async () => {
 export const getPlatformStats = async () => {
     return await API.get("/admin/dashboard/stats")
 }
+

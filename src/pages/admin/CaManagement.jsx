@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { getPendingCAs, approveCA } from "../../services/adminService";
+import { getPendingCAs, approveCA, rejectCA } from "../../services/adminService";
 import MainLayout from "../../components/layouts/MainLayout";
 
 const CAManagement = () => {
@@ -33,6 +33,25 @@ const CAManagement = () => {
             console.log("CA Approved successfully");
         } catch (error) {
             alert("Approval Failed. Please check network.");
+        } finally {
+            setActionId(null);
+        }
+    };
+
+    const handleReject = async (id) => {
+        console.log("Starting rejection process for ID:", id);
+        setActionId(id);
+
+        try {
+            // Force the call and log the result
+            const response = await rejectCA(id);
+            console.log("Success Response:", response);
+
+            setCaUsers(prev => prev.filter(ca => ca.id !== id));
+        } catch (err) {
+            // This will print the ACTUAL backend error (404, 500, etc.)
+            console.error("ACTUAL BACKEND ERROR:", err.response?.data || err.message);
+            alert(`Failed: ${err.response?.data?.message || "Check Console"}`);
         } finally {
             setActionId(null);
         }
@@ -95,20 +114,42 @@ const CAManagement = () => {
                                                 </span>
                                             </td>
                                             <td className="p-5">
-                                                <span className={`flex items-center gap-2 text-sm font-bold ${ca.approved ? 'text-emerald-600' : 'text-amber-500'}`}>
-                                                    <span className={`h-2 w-2 rounded-full ${ca.approved ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                                                    {ca.approved ? "Verified" : "Pending Review"}
+                                                <span className={`flex items-center gap-2 text-sm font-bold ${ca.approvalStatus === "APPROVED"
+                                                    ? "text-emerald-600"
+                                                    : ca.approvalStatus === "REJECTED"
+                                                        ? "text-red-600"
+                                                        : "text-amber-500"
+                                                    }`}>
+                                                    <span className={`h-2 w-2 rounded-full ${ca.approvalStatus === "APPROVED"
+                                                        ? "bg-emerald-500"
+                                                        : ca.approvalStatus === "REJECTED"
+                                                            ? "bg-red-500"
+                                                            : "bg-amber-500"
+                                                        }`}></span>
+                                                    {ca.approvalStatus || "PENDING"}
                                                 </span>
                                             </td>
                                             <td className="p-5 text-right">
-                                                {!ca.approved && (
-                                                    <button
-                                                        onClick={() => handleApprove(ca.id)}
-                                                        disabled={actionId === ca.id}
-                                                        className={`bg-black text-white px-6 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-wait`}
-                                                    >
-                                                        {actionId === ca.id ? "Processing..." : "Approve CA"}
-                                                    </button>
+                                                {ca.approvalStatus === "PENDING" && (
+                                                    <div className="flex justify-end gap-3">
+
+                                                        <button
+                                                            onClick={() => handleApprove(ca.id)}
+                                                            disabled={actionId === ca.id}
+                                                            className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all disabled:opacity-50"
+                                                        >
+                                                            {actionId === ca.id ? "Processing..." : "Approve"}
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() => handleReject(ca.id)}
+                                                            disabled={actionId === ca.id}
+                                                            className="bg-red-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-red-700 transition-all disabled:opacity-50"
+                                                        >
+                                                            Reject
+                                                        </button>
+
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>
