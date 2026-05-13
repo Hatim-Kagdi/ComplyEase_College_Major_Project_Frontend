@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
 import { getAssignedBusinesses } from "../../services/businessService";
 import MainLayout from "../../components/layouts/MainLayout";
 
-// 1. Reusable BusinessCard for CA's client oversight
-const BusinessCard = ({ business }) => (
+// 2. Pass navigate as a prop to the card
+const BusinessCard = ({ business, onViewCompliances }) => (
     <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group">
         <div className="flex justify-between items-start mb-4">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
@@ -32,7 +33,11 @@ const BusinessCard = ({ business }) => (
         </div>
 
         <div className="mt-6 pt-4 border-t border-gray-50 flex gap-3">
-            <button className="flex-1 bg-black text-white py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition shadow-sm">
+            {/* 3. Call the navigation function on click */}
+            <button 
+                onClick={() => onViewCompliances(business.businessId, business.businessName)}
+                className="flex-1 bg-black text-white py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition shadow-sm"
+            >
                 View Compliances
             </button>
         </div>
@@ -43,8 +48,8 @@ const AssignedBusinesses = () => {
     const [businesses, setBusinesses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // 4. Initialize navigate
 
-    // 2. Optimized fetch logic
     const fetchBusinesses = useCallback(async () => {
         try {
             setLoading(true);
@@ -63,10 +68,15 @@ const AssignedBusinesses = () => {
         fetchBusinesses();
     }, [fetchBusinesses]);
 
+    // 5. Navigation Handler logic
+    const handleViewCompliances = (id, name) => {
+        // Navigates to the compliance page with query parameters
+        navigate(`/ca/compliances?businessId=${id}&name=${encodeURIComponent(name)}`);
+    };
+
     return (
         <MainLayout>
-            <div className="max-w-7xl mx-auto">
-                {/* Header Section */}
+            <div className="max-w-7xl mx-auto p-4 md:p-6">
                 <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -90,7 +100,6 @@ const AssignedBusinesses = () => {
                     </div>
                 )}
 
-                {/* 3. Responsive Grid with Loading State */}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[...Array(3)].map((_, i) => (
@@ -100,7 +109,11 @@ const AssignedBusinesses = () => {
                 ) : businesses.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {businesses.map((business) => (
-                            <BusinessCard key={business.businessId} business={business} />
+                            <BusinessCard 
+                                key={business.businessId} 
+                                business={business} 
+                                onViewCompliances={handleViewCompliances} // 6. Pass the function
+                            />
                         ))}
                     </div>
                 ) : (

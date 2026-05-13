@@ -27,6 +27,10 @@ export const deleteCompliance = async (id) => {
     return await API.delete(`/user/compliance/${id}`)
 }
 
+export const getCompliancesByBusiness = async (businessId) => {
+    return await API.get(`/user/compliance/business/${businessId}`); 
+};
+
 //CA API
 export const updateComplianceStatusByCA = async (
     id,

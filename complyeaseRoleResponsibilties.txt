@@ -165,3 +165,51 @@ Very realistic CA workflow.
 If admin disables user:
 User receives:
 Your account has been temporarily deactivated.
+
+====All above features done by 12 may===
+
+1. The "Document-Compliance" Link (Missing Core Logic) (Done)
+Right now, you have Documents and you have Compliances as separate entities. In a real system, a document should belong to a specific compliance record.
+
+The Gap: If I upload a "Bank Statement," the CA needs to know it is for "GST March 2024."
+
+The Feature: When a user views a Compliance record, they should see an "Attached Documents" list.
+
+Implementation: In your Compliance Entity (Java), add a List<Document> or simply allow the User to "link" an existing document ID to a compliance ID.
+
+2. The "Comment/Query" Loop (Missing Communication)
+Compliance is rarely a "one-click" success. Often, the CA looks at a document and finds a mistake.
+
+The Gap: If the CA marks a status as "REJECTED" or "NEEDS REVIEW," the User doesn't know why.
+
+The Feature: A Comment Section on each Compliance record.
+
+The Workflow: 1. CA marks status as "REJECTED."
+2. CA types: "The invoice for $500 is missing the GST number. Please re-upload."
+3. User sees the comment and uploads the corrected file.
+
+3. The "Deadline Countdown" (Missing Urgency)
+Compliance is entirely date-driven. Missing a date by one hour can cost a business thousands in fines.
+
+The Gap: Your dashboard shows "Upcoming Due Dates," but users are lazy—they need visual urgency.
+
+The Feature: Priority Indicators.
+
+Due in > 7 days: Green
+
+Due in < 3 days: Yellow
+
+Due Today/Overdue: Red (Blinking)
+
+The Feature: A "Days Remaining" counter (e.g., "3 days left to file").
+
+4. CA Portfolio Overview (Missing for CA Role)
+A CA doesn't just manage one client; they manage 20-50.
+
+The Gap: If your CA dashboard just lists every compliance for every client in one big table, it becomes a mess.
+
+The Feature: Client-Wise Filtering.
+
+The CA should be able to select "Business A" and see only their records, then switch to "Business B."
+
+A summary card for the CA: "You have 5 clients with overdue compliances."
